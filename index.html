@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Send It To Us — [BAND NAME]</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --ink:#0E0E10;
+    --paper:#F5F1E8;
+    --amber:#F2A93B;
+    --wire:#4A4E58;
+    --alarm:#B33A3A;
+    --line: rgba(245,241,232,0.14);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:56px 24px 80px;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--amber);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px;height:7px;border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 0 0 rgba(242,169,59,0.6);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(242,169,59,0.45);}
+    70%{box-shadow:0 0 0 8px rgba(242,169,59,0);}
+    100%{box-shadow:0 0 0 0 rgba(242,169,59,0);}
+  }
+
+  h1{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    font-size:clamp(42px, 9vw, 68px);
+    line-height:0.94;
+    letter-spacing:0.01em;
+    text-transform:uppercase;
+    margin:0 0 18px;
+  }
+  h1 span{color:var(--amber);}
+
+  .sub{
+    font-size:16px;
+    line-height:1.55;
+    color:rgba(245,241,232,0.72);
+    max-width:46ch;
+    margin:0 0 40px;
+  }
+  .sub b{color:var(--paper); font-weight:600;}
+
+  form{margin-bottom:28px;}
+
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:rgba(245,241,232,0.55);
+    margin-bottom:8px;
+  }
+  .field input[type=text]{
+    width:100%;
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--line);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    padding:10px 2px;
+    outline:none;
+    transition:border-color 0.2s;
+  }
+  .field input[type=text]:focus{border-color:var(--amber);}
+  .field input[type=text]::placeholder{color:rgba(245,241,232,0.32);}
+
+  .fields-row{display:flex; gap:24px;}
+  .fields-row .field{flex:1;}
+
+  .dropzone{
+    border:1px dashed var(--line);
+    border-radius:2px;
+    padding:44px 20px;
+    text-align:center;
+    cursor:pointer;
+    position:relative;
+    transition:border-color 0.2s, background 0.2s;
+  }
+  .dropzone.drag{
+    border-color:var(--amber);
+    background:rgba(242,169,59,0.06);
+  }
+  .dropzone input{display:none;}
+  .dz-title{
+    font-family:'Anton',sans-serif;
+    font-size:22px;
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+    margin-bottom:6px;
+  }
+  .dz-sub{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:rgba(245,241,232,0.5);
+  }
+
+  .setlist{margin-top:26px; display:flex; flex-direction:column; gap:10px;}
+
+  .track{
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .track-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:rgba(245,241,232,0.4);
+    width:20px;
+    flex-shrink:0;
+  }
+  .track-body{flex:1; min-width:0;}
+  .track-name{
+    font-size:14px;
+    font-weight:500;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .track-bar{
+    height:2px;
+    background:var(--line);
+    margin-top:8px;
+    position:relative;
+    overflow:hidden;
+  }
+  .track-bar-fill{
+    position:absolute; left:0; top:0; bottom:0;
+    width:0%;
+    background:var(--amber);
+    transition:width 0.15s linear;
+  }
+  .track-bar-fill.error{background:var(--alarm);}
+
+  .track-time{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:rgba(245,241,232,0.6);
+    width:64px;
+    text-align:right;
+    flex-shrink:0;
+    font-variant-numeric: tabular-nums;
+  }
+  .track-status{
+    width:20px;
+    text-align:center;
+    flex-shrink:0;
+    color:var(--amber);
+  }
+  .track.done .track-time, .track.done .track-name{color:var(--paper);}
+  .track.error .track-time{color:var(--alarm);}
+
+  .submit-row{margin-top:30px;}
+  button.send{
+    font-family:'Anton',sans-serif;
+    font-size:18px;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    background:var(--amber);
+    color:var(--ink);
+    border:none;
+    padding:16px 28px;
+    width:100%;
+    cursor:pointer;
+    transition:transform 0.1s ease, background 0.2s;
+  }
+  button.send:hover:not(:disabled){background:#ffbf5c;}
+  button.send:active:not(:disabled){transform:scale(0.99);}
+  button.send:disabled{
+    background:var(--wire);
+    color:rgba(245,241,232,0.5);
+    cursor:not-allowed;
+  }
+
+  .status-line{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:rgba(245,241,232,0.55);
+    margin-top:14px;
+    min-height:16px;
+  }
+  .status-line.error{color:var(--alarm);}
+
+  .done-screen{
+    display:none;
+    text-align:center;
+    padding:60px 0;
+  }
+  .done-screen.show{display:block;}
+  .done-mark{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    color:var(--amber);
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .done-title{
+    font-family:'Anton',sans-serif;
+    font-size:clamp(36px,8vw,52px);
+    text-transform:uppercase;
+    line-height:0.95;
+    margin:0 0 16px;
+  }
+  .done-sub{color:rgba(245,241,232,0.65); font-size:15px; margin-bottom:28px;}
+  .again{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--paper);
+    background:none;
+    border:1px solid var(--line);
+    padding:12px 20px;
+    cursor:pointer;
+  }
+  .again:hover{border-color:var(--amber); color:var(--amber);}
+
+  #app.hide{display:none;}
+
+  footer{
+    margin-top:50px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:rgba(245,241,232,0.32);
+    letter-spacing:0.04em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Direct line to the archive</div>
+  <h1>Got footage?<br><span>Send it raw.</span></h1>
+  <p class="sub">Skip the app compression. Drop your photos and videos here and they land straight in our archive at <b>full quality</b> — the way you actually shot them.</p>
+
+  <div id="app">
+    <form id="upload-form">
+      <div class="fields-row">
+        <div class="field">
+          <label for="fname">Your name</label>
+          <input type="text" id="fname" placeholder="First name" autocomplete="given-name" />
+        </div>
+        <div class="field">
+          <label for="handle">Instagram / TikTok</label>
+          <input type="text" id="handle" placeholder="@yourhandle" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="note">Where / when was this?</label>
+        <input type="text" id="note" placeholder="e.g. Front row, Manchester, 12 July" />
+      </div>
+
+      <label class="dropzone" id="dropzone">
+        <div class="dz-title">Drop files here</div>
+        <div class="dz-sub">or tap to browse — photos &amp; videos, any size</div>
+        <input type="file" id="file-input" multiple accept="image/*,video/*" />
+      </label>
+
+      <div class="setlist" id="setlist"></div>
+
+      <div class="submit-row">
+        <button type="submit" class="send" id="send-btn" disabled>Send to the archive</button>
+        <div class="status-line" id="status-line"></div>
+      </div>
+    </form>
+  </div>
+
+  <div class="done-screen" id="done-screen">
+    <div class="done-mark">// Received</div>
+    <h1 class="done-title">On the list.</h1>
+    <p class="done-sub">Thanks for sharing this — it's safe with us now, full quality and all.</p>
+    <button class="again" id="send-more">Send more</button>
+  </div>
+
+  <footer>[BAND NAME] · fan uploads are reviewed before we post anything anywhere</footer>
+</div>
+
+<script>
+/* ---------- CONFIG ---------- */
+// Point this at wherever you deploy the /api function (see README).
+// Leave as '' if the page and the API live on the same domain.
+const API_BASE = '';
+const CHUNK_SIZE = 8 * 1024 * 1024; // 8MB chunks for resumable upload
+
+/* ---------- STATE ---------- */
+let queue = []; // {file, id, progress, status, xhr}
+let idCounter = 0;
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+const setlist = document.getElementById('setlist');
+const sendBtn = document.getElementById('send-btn');
+const statusLine = document.getElementById('status-line');
+const form = document.getElementById('upload-form');
+const appEl = document.getElementById('app');
+const doneScreen = document.getElementById('done-screen');
+
+['dragenter','dragover'].forEach(evt=>{
+  dropzone.addEventListener(evt, e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+});
+['dragleave','drop'].forEach(evt=>{
+  dropzone.addEventListener(evt, e=>{ e.preventDefault(); dropzone.classList.remove('drag'); });
+});
+dropzone.addEventListener('drop', e=>{
+  addFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e=>{
+  addFiles(e.target.files);
+  fileInput.value = '';
+});
+
+function addFiles(fileList){
+  Array.from(fileList).forEach(file=>{
+    const id = 'f' + (idCounter++);
+    queue.push({file, id, progress:0, status:'queued'});
+  });
+  renderQueue();
+  updateSendButton();
+}
+
+function fmtSize(bytes){
+  if(bytes > 1e9) return (bytes/1e9).toFixed(1) + ' GB';
+  if(bytes > 1e6) return (bytes/1e6).toFixed(1) + ' MB';
+  return Math.round(bytes/1e3) + ' KB';
+}
+
+function renderQueue(){
+  setlist.innerHTML = '';
+  queue.forEach((item, i)=>{
+    const el = document.createElement('div');
+    el.className = 'track' + (item.status==='done' ? ' done' : '') + (item.status==='error' ? ' error' : '');
+    el.innerHTML = `
+      <div class="track-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="track-body">
+        <div class="track-name">${item.file.name}</div>
+        <div class="track-bar"><div class="track-bar-fill${item.status==='error'?' error':''}" style="width:${item.progress}%"></div></div>
+      </div>
+      <div class="track-time">${fmtSize(item.file.size)}</div>
+      <div class="track-status">${item.status==='done' ? '✓' : (item.status==='error' ? '!' : '')}</div>
+    `;
+    setlist.appendChild(el);
+  });
+}
+
+function updateSendButton(){
+  sendBtn.disabled = queue.length === 0 || queue.some(q=>q.status==='uploading');
+}
+
+function setTrackProgress(id, progress, status){
+  const item = queue.find(q=>q.id===id);
+  if(!item) return;
+  item.progress = progress;
+  if(status) item.status = status;
+  renderQueue();
+}
+
+/* ---------- UPLOAD LOGIC ---------- */
+async function createSession(item){
+  const res = await fetch(`${API_BASE}/api/create-upload-session`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      filename: item.file.name,
+      mimeType: item.file.type || 'application/octet-stream',
+      size: item.file.size,
+      submitter: document.getElementById('fname').value.trim(),
+      handle: document.getElementById('handle').value.trim(),
+      note: document.getElementById('note').value.trim()
+    })
+  });
+  if(!res.ok) throw new Error('Could not start upload session');
+  const data = await res.json();
+  return data.uploadUrl;
+}
+
+function uploadInChunks(item, uploadUrl){
+  return new Promise((resolve, reject)=>{
+    const file = item.file;
+    const total = file.size;
+    let offset = 0;
+
+    function sendNextChunk(){
+      const end = Math.min(offset + CHUNK_SIZE, total);
+      const chunk = file.slice(offset, end);
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', uploadUrl, true);
+      xhr.setRequestHeader('Content-Range', `bytes ${offset}-${end-1}/${total}`);
+      item.xhr = xhr;
+
+      xhr.upload.onprogress = (e)=>{
+        const uploadedSoFar = offset + e.loaded;
+        setTrackProgress(item.id, Math.min(99, Math.round((uploadedSoFar/total)*100)), 'uploading');
+      };
+
+      xhr.onload = ()=>{
+        if(xhr.status === 308){
+          offset = end;
+          if(offset < total){
+            sendNextChunk();
+          } else {
+            setTrackProgress(item.id, 100, 'done');
+            resolve();
+          }
+        } else if(xhr.status === 200 || xhr.status === 201){
+          setTrackProgress(item.id, 100, 'done');
+          resolve();
+        } else {
+          setTrackProgress(item.id, item.progress, 'error');
+          reject(new Error('Upload failed with status ' + xhr.status));
+        }
+      };
+      xhr.onerror = ()=>{
+        setTrackProgress(item.id, item.progress, 'error');
+        reject(new Error('Network error during upload'));
+      };
+      xhr.send(chunk);
+    }
+    sendNextChunk();
+  });
+}
+
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  if(queue.length === 0) return;
+  sendBtn.disabled = true;
+  statusLine.textContent = '';
+  statusLine.classList.remove('error');
+
+  let hadError = false;
+
+  for(const item of queue){
+    if(item.status === 'done') continue;
+    try{
+      setTrackProgress(item.id, 1, 'uploading');
+      const uploadUrl = await createSession(item);
+      await uploadInChunks(item, uploadUrl);
+    } catch(err){
+      hadError = true;
+      setTrackProgress(item.id, item.progress, 'error');
+    }
+  }
+
+  if(hadError){
+    statusLine.textContent = 'Some files didn\u2019t make it through — check your connection and hit send again.';
+    statusLine.classList.add('error');
+    updateSendButton();
+  } else {
+    appEl.classList.add('hide');
+    doneScreen.classList.add('show');
+  }
+});
+
+document.getElementById('send-more').addEventListener('click', ()=>{
+  queue = [];
+  renderQueue();
+  updateSendButton();
+  form.reset();
+  doneScreen.classList.remove('show');
+  appEl.classList.remove('hide');
+});
+</script>
+</body>
+</html>
